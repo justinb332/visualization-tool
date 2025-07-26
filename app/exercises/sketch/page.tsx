@@ -37,7 +37,7 @@ export default function SketchPage() {
     const context = canvas.getContext("2d")
     if (!context) return
 
-    // Set display size to take up most of the screen (moved down from header)
+    // Set display size to take up most of the screen
     const displayWidth = Math.min(window.innerWidth * 0.95, 1400)
     const displayHeight = Math.min(window.innerHeight * 0.75, 800)
     
