@@ -30,6 +30,17 @@ export default function ExercisesPage() {
               </Button>
             </div>
             <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
+              <h3 className="text-xl font-semibold mb-2">Color Gradient Visualization</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Memorize colors and recreate them from memory using RGB sliders.
+              </p>
+              <Button className="btn-primary w-full" asChild>
+                <Link href="/exercises/color-gradient">
+                  <span>Start</span>
+                </Link>
+              </Button>
+            </div>
+            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
               <h3 className="text-xl font-semibold mb-2">Sensory Immersion</h3>
               <p className="text-muted-foreground text-sm mb-4">
                 Add sounds, smells, and textures to your visualizations.

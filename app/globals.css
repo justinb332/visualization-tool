@@ -110,22 +110,20 @@ html {
 .border-secondary { border-color: var(--secondary); }
 .border-accent { border-color: var(--accent); }
 .btn-primary {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  transition: background-color 200ms;
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  cursor: pointer !important;
 }
 .btn-primary:hover {
-  background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+  background-color: color-mix(in srgb, var(--primary) 90%, transparent) !important;
 }
 .btn-secondary {
-  background-color: transparent;
-  border: 1px solid var(--foreground);
-  color: var(--foreground);
-  transition: all 200ms;
+  background-color: var(--secondary) !important;
+  color: var(--secondary-foreground) !important;
+  cursor: pointer !important;
 }
 .btn-secondary:hover {
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: color-mix(in srgb, var(--secondary) 73%, transparent) !important;
 }
 .nav-link {
   color: var(--foreground);

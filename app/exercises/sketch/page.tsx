@@ -2,17 +2,17 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+
 
 const COLORS = [
-  { value: "#000000", name: "Black" },
-  { value: "#ffffff", name: "White" },  
-  { value: "#ff0000", name: "Red" },
-  { value: "#00ff00", name: "Green" },
-  { value: "#0000ff", name: "Blue" },
-  { value: "#ffff00", name: "Yellow" },
+  { value: "#000000", name: "Black" }, 
+  { value: "#ffffff", name: "White" }, 
+  { value: "#ff0000", name: "Red" }, 
+  { value: "#00ff00", name: "Green" }, 
+  { value: "#0000ff", name: "Blue" }, 
+  { value: "#ffff00", name: "Yellow" }, 
   { value: "#ff00ff", name: "Magenta" },
-  { value: "#00ffff", name: "Cyan" },
+  { value: "#00ffff", name: "Cyan" }, 
   { value: "#ffa500", name: "Orange" },
   { value: "#800080", name: "Purple" },
   { value: "#008000", name: "Dark Green" },
@@ -260,24 +260,24 @@ export default function SketchPage() {
             </div>
 
             {/* Action Buttons */}
-            <Button 
-              className="bg-secondary text-secondary-foreground"
+            <button 
+              className="btn-secondary px-3 py-1 rounded-md"
               onClick={toggleReveal}
             >
               {isRevealed ? "Hide Drawing" : "Reveal Drawing"}
-            </Button>
-            <Button 
-              className="bg-secondary text-secondary-foreground"
+            </button>
+            <button 
+              className="btn-secondary px-3 py-1 rounded-md"
               onClick={clearCanvas}
             >
               Clear Canvas
-            </Button>
-            <Button 
-              className="bg-secondary text-secondary-foreground"
+            </button>
+            <button 
+              className="btn-secondary px-3 py-1 rounded-md"
               onClick={() => setShowInstructions(true)}
             >
               Instructions
-            </Button>
+            </button>
           </div>
         </div>
       </main>

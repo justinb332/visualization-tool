@@ -21,7 +21,7 @@ export default function SettingsPage() {
           </p>
           <Button
             onClick={toggleTheme}
-            className="btn-primary px-8 py-3 text-xl font-medium rounded-full" size="lg"
+            className="btn-primary px-8 cursor-pointer py-3 text-xl font-medium rounded-full" size="lg"
           >
             Toggle to {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </Button>
