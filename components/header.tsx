@@ -11,7 +11,7 @@ export function Header({ isVisible }: HeaderProps) {
   return (
     <header
       className={cn(
-        "w-full bg-secondary text-foreground py-4",
+        "w-full bg-secondary text-foreground py-2",
         "transition-transform duration-300 ease-in-out will-change-transform",
         isVisible ? "translate-y-0" : "-translate-y-full",
       )}

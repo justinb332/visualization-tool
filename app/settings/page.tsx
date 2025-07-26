@@ -11,7 +11,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-background text-foreground px-8 py-12">
+    <div className="h-screen flex flex-col items-center justify-center bg-background text-foreground px-8 py-12 pb-50">
       <div className="text-center max-w-md">
         <h2 className="text-3xl md:text-5xl font-bold mb-6">Settings</h2>
         <p className="text-muted-foreground text-lg leading-relaxed mb-8">Adjust your application preferences here.</p>

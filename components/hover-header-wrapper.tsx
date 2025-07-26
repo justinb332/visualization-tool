@@ -32,7 +32,7 @@ export function HoverHeaderWrapper() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 h-20 z-50 overflow-hidden"
+      className="fixed top-0 left-0 right-0 h-8 z-50"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

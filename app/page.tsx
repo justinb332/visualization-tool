@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 export default function HomePage() {
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
-      <main className="flex flex-col items-center px-8 py-20 flex-grow overflow-y-auto">
+      <main className="flex flex-col items-center px-8 py-30 flex-grow overflow-y-auto">
         <div className="text-center max-w-2xl">
           <h1 className="hero-title mb-4">
             <span className="text-4xl text-muted-foreground">Welcome to the</span>
