@@ -15,37 +15,34 @@ export default function ExercisesPage() {
             exercise to begin your training.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
+            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground flex flex-col h-full">
               <h3 className="text-xl font-semibold mb-2">Basic Object Visualization</h3>
-              <p className="text-muted-foreground text-sm mb-4">Focus on visualizing simple objects in detail.</p>
-              <Button className="btn-primary w-full">Start</Button>
+              <p className="text-muted-foreground text-sm mb-4 flex-grow">Focus on visualizing simple objects in detail.</p>
+              <Button className="btn-primary w-full text-md" asChild>
+                <Link href="/exercises/basic-object">
+                  <span>Start</span>
+                </Link>
+              </Button>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
-              <h3 className="text-xl font-semibold mb-2">Blind Sketching</h3>
-              <p className="text-muted-foreground text-sm mb-4">Use the canvas to draw, but visualize your sketch mentally.</p>
-              <Button className="btn-primary w-full" asChild>
+            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground flex flex-col h-full">
+              <h3 className="text-xl font-semibold mb-2">Blind Sketch</h3>
+              <p className="text-muted-foreground text-sm mb-4 flex-grow">Use the canvas to draw, but visualize your sketch mentally.</p>
+              <Button className="btn-primary text-md w-full" asChild>
                 <Link href="/exercises/sketch">
                   <span>Start</span>
                 </Link>
               </Button>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
-              <h3 className="text-xl font-semibold mb-2">Color Gradient Visualization</h3>
-              <p className="text-muted-foreground text-sm mb-4">
+            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground flex flex-col h-full">
+              <h3 className="text-xl font-semibold mb-2">Color Recall</h3>
+              <p className="text-muted-foreground text-sm mb-4 flex-grow">
                 Memorize colors and recreate them from memory using RGB sliders.
               </p>
-              <Button className="btn-primary w-full" asChild>
+              <Button className="btn-primary w-full text-md" asChild>
                 <Link href="/exercises/color-gradient">
                   <span>Start</span>
                 </Link>
               </Button>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground">
-              <h3 className="text-xl font-semibold mb-2">Sensory Immersion</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Add sounds, smells, and textures to your visualizations.
-              </p>
-              <Button className="btn-primary w-full">Start</Button>
             </div>
           </div>
         </div>

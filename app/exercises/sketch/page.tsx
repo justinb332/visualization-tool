@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 
@@ -260,24 +261,27 @@ export default function SketchPage() {
             </div>
 
             {/* Action Buttons */}
-            <button 
-              className="btn-secondary px-3 py-1 rounded-md"
+            <Button 
+              className="btn-secondary px-3 py-1"
               onClick={toggleReveal}
+              variant="secondary"
             >
               {isRevealed ? "Hide Drawing" : "Reveal Drawing"}
-            </button>
-            <button 
-              className="btn-secondary px-3 py-1 rounded-md"
+            </Button>
+            <Button 
+              className="btn-secondary px-3 py-1"
               onClick={clearCanvas}
+              variant="secondary"
             >
               Clear Canvas
-            </button>
-            <button 
-              className="btn-secondary px-3 py-1 rounded-md"
+            </Button>
+            <Button 
+              className="btn-secondary px-3 py-1"
               onClick={() => setShowInstructions(true)}
+              variant="secondary"
             >
               Instructions
-            </button>
+            </Button>
           </div>
         </div>
       </main>
@@ -290,7 +294,7 @@ export default function SketchPage() {
               <h3 className="text-xl font-bold">Blind Sketching Instructions</h3>
               <button
                 onClick={() => setShowInstructions(false)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

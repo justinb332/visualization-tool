@@ -22,6 +22,7 @@ export default function ColorGradientPage() {
   const [score, setScore] = useState<number | null>(null)
   const [showInstructions, setShowInstructions] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [hasStarted, setHasStarted] = useState(false)
 
   // Start a new round
   const startRound = () => {
@@ -34,6 +35,7 @@ export default function ColorGradientPage() {
     setPhase('memorizing')
     setScore(null)
     setCountdown(5)
+    setHasStarted(true)
   }
 
   // Countdown effect for memorization phase
@@ -109,175 +111,180 @@ export default function ColorGradientPage() {
       <main className="flex-1 flex flex-col items-center justify-center p-8 pt-20">
         <div className="max-w-4xl w-full space-y-8">
           
-          {/* Title */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">Color Gradient Visualization</h1>
-            <p className="text-muted-foreground">
-              Memorize the color and recreate it using RGB sliders
-            </p>
-          </div>
-
-          {/* Color Display Area */}
-          <div className="flex gap-8 justify-center items-center">
-            
-            {/* Target Color (shown during memorizing and comparing phases) */}
-            {showTarget && currentColor && (
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">
-                  {phase === 'memorizing' ? 'Memorize This Color' : 'Target Color'}
-                </h3>
-                <div 
-                  className="w-48 h-48 rounded-lg border-2 border-gray-300 shadow-lg"
-                  style={{ 
-                    backgroundColor: `rgb(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]})` 
-                  }}
-                />
-                {phase === 'memorizing' && (
-                  <p className="text-2xl font-bold text-blue-600 mt-2">{countdown}s</p>
-                )}
-                {phase === 'comparing' && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    RGB({currentColor[0]}, {currentColor[1]}, {currentColor[2]})
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* User Color (shown during recreating and comparing phases) */}
-            {(phase === 'recreating' || phase === 'comparing') && (
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Your Recreation</h3>
-                <div 
-                  className="w-48 h-48 rounded-lg border-2 border-gray-300 shadow-lg"
-                  style={{ 
-                    backgroundColor: `rgb(${userRed}, ${userGreen}, ${userBlue})` 
-                  }}
-                />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  RGB({userRed}, {userGreen}, {userBlue})
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* RGB Sliders (shown during recreating phase) */}
-          {phase === 'recreating' && (
-            <div className="max-w-md mx-auto space-y-4">
-              <h3 className="text-lg font-semibold text-center mb-4">
-                Recreate the color from memory
-              </h3>
-              
-              {/* Red Slider */}
-              <div className="space-y-2">
-                <label className="flex justify-between text-sm font-medium">
-                  <span>Red: {userRed}</span>
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="255"
-                  value={userRed}
-                  onChange={(e) => setUserRed(Number(e.target.value))}
-                  className="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer slider-red"
-                />
-              </div>
-
-              {/* Green Slider */}
-              <div className="space-y-2">
-                <label className="flex justify-between text-sm font-medium">
-                  <span>Green: {userGreen}</span>
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="255"
-                  value={userGreen}
-                  onChange={(e) => setUserGreen(Number(e.target.value))}
-                  className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider-green"
-                />
-              </div>
-
-              {/* Blue Slider */}
-              <div className="space-y-2">
-                <label className="flex justify-between text-sm font-medium">
-                  <span>Blue: {userBlue}</span>
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="255"
-                  value={userBlue}
-                  onChange={(e) => setUserBlue(Number(e.target.value))}
-                  className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-blue"
-                />
-              </div>
+          {/* Title - only shown before starting */}
+          {!hasStarted && (
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-2">Color Recall</h1>
+              <p className="text-muted-foreground">
+                Memorize the color and recreate it using RGB sliders
+              </p>
             </div>
           )}
 
-          {/* Score Display */}
-          {phase === 'comparing' && score !== null && (
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-semibold">Your Score</h3>
-              <p className={`text-4xl font-bold ${getScoreColor(score)}`}>
-                {score}%
-              </p>
-              <p className="text-muted-foreground">
-                {getScoreMessage(score)}
-              </p>
-              {currentColor && (
-                <div className="text-sm text-muted-foreground mt-4">
-                  <p>Target: RGB({currentColor[0]}, {currentColor[1]}, {currentColor[2]})</p>
-                  <p>Your guess: RGB({userRed}, {userGreen}, {userBlue})</p>
+          {/* Starting Phase */}
+          {!hasStarted ? (
+            <div className="flex gap-4 justify-center">
+              <Button 
+                onClick={startRound}
+                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+              >
+                Start Exercise
+              </Button>
+              <Button 
+                onClick={() => setShowInstructions(true)}
+                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+              >
+                Instructions
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Color Display Area */}
+              <div className="flex gap-8 justify-center items-center">
+                
+                {/* Target Color (shown during memorizing and comparing phases) */}
+                {showTarget && currentColor && (
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-2">
+                      {phase === 'memorizing' ? 'Memorize This Color' : 'Target Color'}
+                    </h3>
+                    <div 
+                      className="w-48 h-48 rounded-lg border-2 border-gray-300 shadow-lg"
+                      style={{ 
+                        backgroundColor: `rgb(${currentColor[0]}, ${currentColor[1]}, ${currentColor[2]})` 
+                      }}
+                    />
+                    {phase === 'memorizing' && (
+                      <p className="text-2xl font-bold text-blue-600 mt-2">{countdown}s</p>
+                    )}
+                    {phase === 'comparing' && (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        RGB({currentColor[0]}, {currentColor[1]}, {currentColor[2]})
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* User Color (shown during recreating and comparing phases) */}
+                {(phase === 'recreating' || phase === 'comparing') && (
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-2">Your Recreation</h3>
+                    <div 
+                      className="w-48 h-48 rounded-lg border-2 border-gray-300 shadow-lg"
+                      style={{ 
+                        backgroundColor: `rgb(${userRed}, ${userGreen}, ${userBlue})` 
+                      }}
+                    />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      RGB({userRed}, {userGreen}, {userBlue})
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* RGB Sliders (shown during recreating phase) */}
+              {phase === 'recreating' && (
+                <div className="max-w-md mx-auto space-y-4">
+                  <h3 className="text-lg font-semibold text-center mb-4">
+                    Recreate the color from memory
+                  </h3>
+                  
+                  {/* Red Slider */}
+                  <div className="space-y-2">
+                    <label className="flex justify-between text-sm font-medium">
+                      <span>Red: {userRed}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={userRed}
+                      onChange={(e) => setUserRed(Number(e.target.value))}
+                      className="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer slider-red"
+                    />
+                  </div>
+
+                  {/* Green Slider */}
+                  <div className="space-y-2">
+                    <label className="flex justify-between text-sm font-medium">
+                      <span>Green: {userGreen}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={userGreen}
+                      onChange={(e) => setUserGreen(Number(e.target.value))}
+                      className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider-green"
+                    />
+                  </div>
+
+                  {/* Blue Slider */}
+                  <div className="space-y-2">
+                    <label className="flex justify-between text-sm font-medium">
+                      <span>Blue: {userBlue}</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={userBlue}
+                      onChange={(e) => setUserBlue(Number(e.target.value))}
+                      className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-blue"
+                    />
+                  </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Control Buttons */}
-          <div className="flex gap-4 justify-center">
-            {phase === 'waiting' && (
-              <>
-                <button 
-                  onClick={startRound}
-                  className="btn-primary px-6 py-2 rounded-md"
-                >
-                  Start Exercise
-                </button>
-                <button 
-                  onClick={() => setShowInstructions(true)}
-                  className="btn-primary px-6 py-2 rounded-md"
-                >
-                  Instructions
-                </button>
-              </>
-            )}
-            
-            {phase === 'recreating' && (
-              <button 
-                onClick={submitColor}
-                className="btn-primary px-6 py-2 rounded-md"
-              >
-                Submit Color
-              </button>
-            )}
-            
-            {phase === 'comparing' && (
-              <div className="flex gap-4">
-                <button 
-                  onClick={startRound}
-                  className="btn-primary px-6 py-2 rounded-md"
-                >
-                  Try Another
-                </button>
-                <button 
-                  onClick={() => setShowInstructions(true)}
-                  className="btn-primary px-6 py-2 rounded-md"
-                >
-                  Instructions
-                </button>
+              {/* Score Display */}
+              {phase === 'comparing' && score !== null && (
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-semibold">Your Score</h3>
+                  <p className={`text-4xl font-bold ${getScoreColor(score)}`}>
+                    {score}%
+                  </p>
+                  <p className="text-muted-foreground">
+                    {getScoreMessage(score)}
+                  </p>
+                  {currentColor && (
+                    <div className="text-sm text-muted-foreground mt-4">
+                      <p>Target: RGB({currentColor[0]}, {currentColor[1]}, {currentColor[2]})</p>
+                      <p>Your guess: RGB({userRed}, {userGreen}, {userBlue})</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Control Buttons */}
+              <div className="flex gap-4 justify-center">
+                {phase === 'recreating' && (
+                  <Button 
+                    onClick={submitColor}
+                    className="px-6 py-2"
+                  >
+                    Submit Color
+                  </Button>
+                )}
+                
+                {phase === 'comparing' && (
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={startRound}
+                      className="px-6 py-2"
+                    >
+                      Try Another
+                    </Button>
+                    <Button 
+                      onClick={() => setShowInstructions(true)}
+                      className="px-6 py-2"
+                    >
+                      Instructions
+                    </Button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </main>
 
@@ -289,7 +296,7 @@ export default function ColorGradientPage() {
               <h3 className="text-xl font-bold">Color Gradient Instructions</h3>
               <button
                 onClick={() => setShowInstructions(false)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
