@@ -54,7 +54,7 @@ function UnifiedExerciseHeader({
         {onNewObject && (
           <Button 
             onClick={() => handleButtonClick(onNewObject)}
-            className="btn-primary px-6 py-3 w-32 border min-h-[44px] touch-manipulation"
+            className="btn-primary px-6 py-3 w-30 border min-h-[44px] touch-manipulation text-md"
             variant="secondary"
           >
             New Object
@@ -64,7 +64,7 @@ function UnifiedExerciseHeader({
         {onShowInstructions && (
           <Button 
             onClick={() => handleButtonClick(onShowInstructions)}
-            className="btn-primary px-6 py-3 w-32 border min-h-[44px] touch-manipulation"
+            className="btn-primary px-6 py-3 w-30 border min-h-[44px] touch-manipulation text-md"
             variant="secondary"
           >
             Instructions
@@ -96,7 +96,7 @@ export function UnifiedExerciseHeaderWrapper({
       const timer = setTimeout(() => {
         setShowTouchIndicator(false)
         setShowHoverIndicator(false)
-      }, 3000)
+      }, 3600)
       return () => clearTimeout(timer)
     }
   }, [showTouchIndicator, showHoverIndicator])
@@ -139,7 +139,11 @@ export function UnifiedExerciseHeaderWrapper({
       }, 200) // Short delay to allow header to appear first
     }
     
-    hideHeaderDelayed()
+    // Keep header visible longer when button is clicked (2 seconds)
+    const id = setTimeout(() => {
+      setIsVisible(false)
+    }, 2000)
+    setTimeoutId(id)
   }
 
   const handleMouseEnter = () => {
@@ -192,10 +196,12 @@ export function UnifiedExerciseHeaderWrapper({
     >
       {/* Touch indicator for mobile devices */}
       {isTouchDevice && (
-        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 z-30 ${
-          showTouchIndicator && !isVisible ? 'opacity-70 animate-pulse' : 'opacity-0'
+        <div className={`py-2 absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 ease-in-out z-30 ${
+          showHoverIndicator && !isVisible ? 'opacity-80' : 'opacity-0'
         }`}>
-          <div className="bg-foreground text-background px-3 py-1 rounded text-sm shadow-lg">
+          <div className={`bg-secondary text-primary px-2 py-1 rounded text-sm shadow-lg ${
+            showHoverIndicator && !isVisible ? 'animate-pulse' : ''
+          }`}>
             Tap for controls
           </div>
         </div>
@@ -203,10 +209,12 @@ export function UnifiedExerciseHeaderWrapper({
       
       {/* Hover indicator for desktop devices */}
       {!isTouchDevice && (
-        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 z-30 ${
-          showHoverIndicator && !isVisible ? 'opacity-60 animate-pulse' : 'opacity-0'
+        <div className={`py-2 absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 ease-in-out z-30 ${
+          showHoverIndicator && !isVisible ? 'opacity-80' : 'opacity-0'
         }`}>
-          <div className="bg-foreground text-background px-3 py-1 rounded text-sm shadow-lg">
+          <div className={`bg-secondary text-primary px-2 py-1 rounded text-sm shadow-lg ${
+            showHoverIndicator && !isVisible ? 'animate-pulse' : ''
+          }`}>
             Hover for controls
           </div>
         </div>

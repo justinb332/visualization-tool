@@ -5,72 +5,107 @@ import { Button } from "@/components/ui/button"
 import { UnifiedExerciseHeaderWrapper } from "@/components/unified-exercise-header"
 import Image from "next/image"
 
-// Type definition for image objects
-interface ImageObject {
-  src: string
-  name: string
-  filename: string
-  exercise: string
-}
-
 export default function BasicObjectVisualizationPage() {
-  const [objectImages, setObjectImages] = useState<ImageObject[]>([])
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [availableImages, setAvailableImages] = useState<string[]>([]) // Just filenames
+  const [usedImages, setUsedImages] = useState<string[]>([]) // Track used filenames
+  const [currentImageFilename, setCurrentImageFilename] = useState<string | null>(null) // Current filename
   const [isImageRevealed, setIsImageRevealed] = useState(true)
   const [showInstructions, setShowInstructions] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Load images from API on component mount
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        const response = await fetch('/api/images?exercise=basic-object')
-        if (!response.ok) {
-          throw new Error('Failed to load images')
-        }
-        const images = await response.json()
-        if (images.error) {
-          throw new Error(images.error)
-        }
-        if (images.length === 0) {
-          throw new Error('No images found')
-        }
-        setObjectImages(images)
-        // Set random initial image
-        setCurrentImageIndex(Math.floor(Math.random() * images.length))
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load images')
-      } finally {
-        setIsLoading(false)
+  // Load available image filenames
+  const loadImageList = async () => {
+    try {
+      setError(null)
+      const response = await fetch('/api/images?exercise=basic-object')
+      if (!response.ok) {
+        throw new Error('Failed to load image list')
+      }
+      const filenames = await response.json()
+      if (filenames.error) {
+        throw new Error(filenames.error)
+      }
+      if (filenames.length === 0) {
+        throw new Error('No images found')
+      }
+      setAvailableImages(filenames)
+      return filenames
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load image list')
+      return null
+    }
+  }
+
+  // Load a specific image on demand
+  const loadRandomImage = async () => {
+    if (availableImages.length === 0) return
+    
+    try {
+      // Get current filename 
+      const currentFilename = currentImageFilename
+      
+      // Get images that haven't been used yet, excluding the current image
+      let unusedImages = availableImages.filter(img => 
+        !usedImages.includes(img) && img !== currentFilename
+      )
+      
+      // If all images have been used (or only current image remains), reset the used images list
+      let imagesToChooseFrom = unusedImages
+      if (unusedImages.length === 0) {
+        // Reset and exclude only the current image
+        imagesToChooseFrom = availableImages.filter(img => img !== currentFilename)
+        setUsedImages(currentFilename ? [currentFilename] : []) // Keep current image in used list
+      }
+      
+      // If we still have no options (only 1 image total), use all available
+      if (imagesToChooseFrom.length === 0) {
+        imagesToChooseFrom = availableImages
+      }
+      
+      // Pick random filename from available images
+      const randomFilename = imagesToChooseFrom[Math.floor(Math.random() * imagesToChooseFrom.length)]
+      
+      // Set the current filename
+      setCurrentImageFilename(randomFilename)
+      setIsImageRevealed(true)
+      
+      // Add this image to used images
+      setUsedImages(prev => [...prev, randomFilename])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load image')
+    }
+  }
+
+  const startExercise = async () => {
+    setHasStarted(true)
+    // Load the image list if not already loaded
+    let imagesToUse = availableImages
+    if (availableImages.length === 0) {
+      const imageList = await loadImageList()
+      if (imageList && imageList.length > 0) {
+        imagesToUse = imageList
       }
     }
-
-    loadImages()
-  }, [])
-
-  const currentImage = objectImages[currentImageIndex]
+    // Load first random image when starting
+    if (imagesToUse.length > 0) {
+      const randomFilename = imagesToUse[Math.floor(Math.random() * imagesToUse.length)]
+      
+      setCurrentImageFilename(randomFilename)
+      setIsImageRevealed(true)
+      
+      // Add this image to used images
+      setUsedImages([randomFilename])
+    }
+  }
 
   const nextImage = () => {
-    if (objectImages.length <= 1) return
-    
-    // Get a random index that's different from current
-    let newIndex
-    do {
-      newIndex = Math.floor(Math.random() * objectImages.length)
-    } while (newIndex === currentImageIndex && objectImages.length > 1)
-    
-    setCurrentImageIndex(newIndex)
-    setIsImageRevealed(true) // Show the new image by default
+    if (availableImages.length === 0) return
+    loadRandomImage()
   }
 
-  const startExercise = () => {
-    setHasStarted(true)
-    setIsImageRevealed(true)
-  }
+  // Build src path from current filename
+  const currentImageSrc = currentImageFilename ? `/images/basic-object/${currentImageFilename}` : null
 
   // Hide image on spacebar press or screen touch
   useEffect(() => {
@@ -127,18 +162,18 @@ export default function BasicObjectVisualizationPage() {
           )}
 
           {/* Starting Phase */}
-          {!hasStarted ? (
-            <div className="flex gap-4 justify-center">
-              <Button 
+          {!hasStarted ? (            
+          <div className="flex gap-4 justify-center">
+              <Button
                 onClick={startExercise}
-                disabled={isLoading || error !== null || objectImages.length === 0}
-                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+                disabled={error !== null}
+                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
               >
-                {isLoading ? 'Loading Images...' : 'Start Exercise'}
+                Start Exercise
               </Button>
               <Button 
                 onClick={() => setShowInstructions(true)}
-                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
               >
                 Instructions
               </Button>
@@ -148,12 +183,12 @@ export default function BasicObjectVisualizationPage() {
               {/* Image Display Area */}
               <div className="flex justify-center items-center min-h-[350px]">
                 <div className="relative">
-                  {isImageRevealed && currentImage && (
+                  {isImageRevealed && currentImageSrc ? (
                     <div className="text-center">
                       <div className="p-8">
                         <Image
-                          src={currentImage.src}
-                          alt={currentImage.name || "Object"}
+                          src={currentImageSrc}
+                          alt="Image"
                           width={300}
                           height={300}
                           className="object-contain"
@@ -161,17 +196,10 @@ export default function BasicObjectVisualizationPage() {
                         />
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </>
-          )}
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="text-center text-muted-foreground">
-              Loading images...
-            </div>
           )}
 
           {/* Error State */}
@@ -186,8 +214,8 @@ export default function BasicObjectVisualizationPage() {
         </div>
       </main>
 
-      {/* Unified Exercise Header - only show when exercise has started and images are loaded */}
-      {hasStarted && objectImages.length > 0 && (
+      {/* Unified Exercise Header - only show when exercise has started and we have images available */}
+      {hasStarted && availableImages.length > 0 && (
         <UnifiedExerciseHeaderWrapper
           onNewObject={nextImage}
           onShowInstructions={() => setShowInstructions(true)}

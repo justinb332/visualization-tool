@@ -16,15 +16,8 @@ export async function GET(request: Request) {
       imageExtensions.some(ext => name.toLowerCase().endsWith(ext))
     )
     
-    // Create image objects with src paths
-    const images = imageFiles.map(filename => ({
-      src: `/images/${exercise}/${filename}`,
-      name: filename.replace(/\.[^/.]+$/, ""), // Remove extension for display name
-      filename,
-      exercise
-    }))
-    
-    return NextResponse.json(images)
+    // Return filenames
+    return NextResponse.json(imageFiles)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to read images' }, { status: 500 })
   }

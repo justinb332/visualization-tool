@@ -17,16 +17,14 @@ export function HoverHeaderWrapper() {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
   }, [])
 
-  // Hide indicators after 3 seconds on first visit
+  // Hide indicators after a few seconds on first visit
   useEffect(() => {
-    if (showTouchIndicator || showHoverIndicator) {
-      const timer = setTimeout(() => {
-        setShowTouchIndicator(false)
-        setShowHoverIndicator(false)
-      }, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [showTouchIndicator, showHoverIndicator])
+    const timer = setTimeout(() => {
+      setShowTouchIndicator(false)
+      setShowHoverIndicator(false)
+    }, 3500)
+    return () => clearTimeout(timer)
+  }, []) // Remove dependencies so it only runs once on mount
 
   // Hide global header on basic object exercise page only after exercise starts
   const shouldHideHeader = pathname === "/exercises/basic-object" && 
@@ -132,10 +130,12 @@ export function HoverHeaderWrapper() {
     >
       {/* Touch indicator for mobile devices */}
       {isTouchDevice && (
-        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 z-30 ${
-          showTouchIndicator && !isVisible ? 'opacity-60 animate-pulse' : 'opacity-0'
+        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 ease-in-out z-30 ${
+          showTouchIndicator && !isVisible ? 'opacity-80' : 'opacity-0'
         }`}>
-          <div className="bg-foreground text-background px-2 py-1 rounded text-xs shadow-lg">
+          <div className={`bg-secondary text-primary px-2 py-1 rounded text-xs shadow-lg ${
+            showTouchIndicator && !isVisible ? 'animate-pulse' : ''
+          }`}>
             Tap to show menu
           </div>
         </div>
@@ -143,10 +143,12 @@ export function HoverHeaderWrapper() {
       
       {/* Hover indicator for desktop devices */}
       {!isTouchDevice && (
-        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 z-30 ${
-          showHoverIndicator && !isVisible ? 'opacity-50 animate-pulse' : 'opacity-0'
+        <div className={`py-2 absolute top-2 left-1/2 transform -translate-x-1/2 transition-opacity duration-1000 ease-in-out z-30 ${
+          showHoverIndicator && !isVisible ? 'opacity-80' : 'opacity-0'
         }`}>
-          <div className="bg-foreground text-background px-2 py-1 rounded text-xs shadow-lg">
+          <div className={`bg-secondary text-primary px-2 py-1 rounded text-sm shadow-lg ${
+            showHoverIndicator && !isVisible ? 'animate-pulse' : ''
+          }`}>
             Hover to show menu
           </div>
         </div>

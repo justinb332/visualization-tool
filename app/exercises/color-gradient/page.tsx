@@ -126,13 +126,13 @@ export default function ColorGradientPage() {
             <div className="flex gap-4 justify-center">
               <Button 
                 onClick={startRound}
-                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
               >
                 Start Exercise
               </Button>
               <Button 
                 onClick={() => setShowInstructions(true)}
-                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
               >
                 Instructions
               </Button>
@@ -260,7 +260,7 @@ export default function ColorGradientPage() {
                 {phase === 'recreating' && (
                   <Button 
                     onClick={submitColor}
-                    className="px-6 py-2"
+                    className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
                   >
                     Submit Color
                   </Button>
@@ -270,13 +270,13 @@ export default function ColorGradientPage() {
                   <div className="flex gap-4">
                     <Button 
                       onClick={startRound}
-                      className="px-6 py-2"
+                      className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
                     >
                       Try Another
                     </Button>
                     <Button 
                       onClick={() => setShowInstructions(true)}
-                      className="px-6 py-2"
+                      className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
                     >
                       Instructions
                     </Button>
