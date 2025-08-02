@@ -1,97 +1,198 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { UnifiedExerciseHeaderWrapper } from "@/components/unified-exercise-header"
 import Image from "next/image"
 
-// Object images for visualization practice
-const OBJECT_IMAGES = [
-  {
-    src: "/images/apple.png",
-    alt: "Red Apple",
-    name: "Apple"
-  }
-  // More images can be added here as they become available
-]
+// Type definition for image objects
+interface ImageObject {
+  src: string
+  name: string
+  filename: string
+  exercise: string
+}
 
 export default function BasicObjectVisualizationPage() {
+  const [objectImages, setObjectImages] = useState<ImageObject[]>([])
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageRevealed, setIsImageRevealed] = useState(true)
   const [showInstructions, setShowInstructions] = useState(false)
+  const [hasStarted, setHasStarted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const currentImage = OBJECT_IMAGES[currentImageIndex]
+  // Load images from API on component mount
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const response = await fetch('/api/images?exercise=basic-object')
+        if (!response.ok) {
+          throw new Error('Failed to load images')
+        }
+        const images = await response.json()
+        if (images.error) {
+          throw new Error(images.error)
+        }
+        if (images.length === 0) {
+          throw new Error('No images found')
+        }
+        setObjectImages(images)
+        // Set random initial image
+        setCurrentImageIndex(Math.floor(Math.random() * images.length))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load images')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadImages()
+  }, [])
+
+  const currentImage = objectImages[currentImageIndex]
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % OBJECT_IMAGES.length)
+    if (objectImages.length <= 1) return
+    
+    // Get a random index that's different from current
+    let newIndex
+    do {
+      newIndex = Math.floor(Math.random() * objectImages.length)
+    } while (newIndex === currentImageIndex && objectImages.length > 1)
+    
+    setCurrentImageIndex(newIndex)
     setIsImageRevealed(true) // Show the new image by default
   }
 
-  const toggleImageVisibility = () => {
-    setIsImageRevealed(!isImageRevealed)
+  const startExercise = () => {
+    setHasStarted(true)
+    setIsImageRevealed(true)
   }
 
+  // Hide image on spacebar press or screen touch
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault()
+        setIsImageRevealed(!isImageRevealed)
+      }
+    }
+
+    const handleClick = (event: MouseEvent) => {
+      // Don't hide if clicking on buttons or instructions popup
+      const target = event.target as HTMLElement
+      if (target.closest('button') || target.closest('[role="dialog"]') || target.closest('.fixed')) {
+        return
+      }
+      setIsImageRevealed(!isImageRevealed)
+    }
+
+    const handleTouch = (event: TouchEvent) => {
+      // Don't hide if touching buttons or instructions popup
+      const target = event.target as HTMLElement
+      if (target.closest('button') || target.closest('[role="dialog"]') || target.closest('.fixed')) {
+        return
+      }
+      setIsImageRevealed(!isImageRevealed)
+    }
+
+    document.addEventListener('keydown', handleKeyPress)
+    document.addEventListener('click', handleClick)
+    document.addEventListener('touchstart', handleTouch)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress)
+      document.removeEventListener('click', handleClick)
+      document.removeEventListener('touchstart', handleTouch)
+    }
+  }, [isImageRevealed])
+
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
+    <div className="h-screen flex flex-col bg-background text-foreground" data-exercise-started={hasStarted.toString()}>
       {/* Main Exercise Area */}
       <main className="flex-1 flex flex-col items-center justify-center p-8 pt-20">
         <div className="max-w-4xl w-full space-y-8">
           
-          {/* Image Display Area */}
-          <div className="flex justify-center items-center min-h-[350px]">
-            <div className="relative">
-              {isImageRevealed && (
-                <div className="text-center">
-                  <div className="p-8">
-                    <Image
-                      src={currentImage.src}
-                      alt={currentImage.alt}
-                      width={300}
-                      height={300}
-                      className="object-contain"
-                      priority
-                    />
-                  </div>
-                </div>
-              )}
+          {/* Title - only shown before starting */}
+          {!hasStarted && (
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-2">Basic Object Visualization</h1>
+              <p className="text-muted-foreground">
+                Practice detailed object visualization to develop your mental imagery
+              </p>
             </div>
-          </div>
+          )}
 
-          {/* Control Buttons */}
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button 
-              onClick={nextImage}
-              className="btn-secondary px-6 py-2 w-32"
-              disabled={OBJECT_IMAGES.length <= 1}
-              variant="secondary"
-            >
-              New Object
-            </Button>
-            
-            <Button 
-              onClick={toggleImageVisibility}
-              className="btn-secondary px-6 py-2 w-32"
-              variant="secondary"
-            >
-              {isImageRevealed ? "Hide Image" : "Reveal Image"}
-            </Button>
-            
-            <Button 
-              onClick={() => setShowInstructions(true)}
-              className="btn-secondary px-6 py-2 w-32"
-              variant="secondary"
-            >
-              Instructions
-            </Button>
-          </div>
+          {/* Starting Phase */}
+          {!hasStarted ? (
+            <div className="flex gap-4 justify-center">
+              <Button 
+                onClick={startExercise}
+                disabled={isLoading || error !== null || objectImages.length === 0}
+                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+              >
+                {isLoading ? 'Loading Images...' : 'Start Exercise'}
+              </Button>
+              <Button 
+                onClick={() => setShowInstructions(true)}
+                className="btn-primary px-8 cursor-pointer py-5 text-md font-medium" size="default"
+              >
+                Instructions
+              </Button>
+            </div>
+          ) : (
+            <>
+              {/* Image Display Area */}
+              <div className="flex justify-center items-center min-h-[350px]">
+                <div className="relative">
+                  {isImageRevealed && currentImage && (
+                    <div className="text-center">
+                      <div className="p-8">
+                        <Image
+                          src={currentImage.src}
+                          alt={currentImage.name || "Object"}
+                          width={300}
+                          height={300}
+                          className="object-contain"
+                          priority
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
-          {/* Progress Info */}
-          {OBJECT_IMAGES.length > 1 && (
-            <div className="text-center text-sm text-muted-foreground">
-              Object {currentImageIndex + 1} of {OBJECT_IMAGES.length}
+          {/* Loading State */}
+          {isLoading && (
+            <div className="text-center text-muted-foreground">
+              Loading images...
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center text-red-500">
+              <p>Error: {error}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Please make sure there are image files in the /public/images/ directory
+              </p>
             </div>
           )}
         </div>
       </main>
+
+      {/* Unified Exercise Header - only show when exercise has started and images are loaded */}
+      {hasStarted && objectImages.length > 0 && (
+        <UnifiedExerciseHeaderWrapper
+          onNewObject={nextImage}
+          onShowInstructions={() => setShowInstructions(true)}
+        />
+      )}
 
       {/* Instructions Popup */}
       {showInstructions && (
@@ -114,14 +215,13 @@ export default function BasicObjectVisualizationPage() {
               </p>
               <div className="space-y-2">
                 <h4 className="font-semibold">How to practice:</h4>
-                <ul className="text-muted-foreground space-y-1 ml-4">
-                  <li>• Study the object carefully when it's visible</li>
-                  <li>• Pay attention to shape, color, texture, and details</li>
-                  <li>• Click "Hide Image" to practice visualization</li>
-                  <li>• Close your eyes and try to "see" the object in your mind</li>
-                  <li>• Focus on recreating every detail mentally</li>
-                  <li>• Click "Reveal Image" to check your mental image</li>
-                  <li>• Use "New Object" to practice with different items</li>
+                <ul className="text-muted-foreground space-y-1 ml-4 list-disc list-outside">
+                  <li className="pl-2">Study the object carefully when it's visible</li>
+                  <li className="pl-2">Pay attention to shape, color, texture, and details</li>
+                  <li className="pl-2">Touch anywhere on screen or press spacebar to hide the image,
+                        focusing on recreating every detail mentally. Press again to show the image.</li>
+                  <li className="pl-2">Hover over top of screen to access control buttons</li>
+                  <li className="pl-2">Use "New Object" to practice with different items</li>
                 </ul>
               </div>
               <div className="bg-accent p-3 rounded">

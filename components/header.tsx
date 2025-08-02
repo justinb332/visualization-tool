@@ -11,10 +11,11 @@ export function Header({ isVisible }: HeaderProps) {
   return (
     <header
       className={cn(
-        "w-full bg-secondary text-foreground py-2",
+        "w-full bg-secondary text-foreground py-2 relative z-40",
         "transition-transform duration-300 ease-in-out will-change-transform",
         isVisible ? "translate-y-0" : "-translate-y-full",
       )}
+      style={{ backgroundColor: 'var(--secondary)' }} // Ensure solid background
     >
       <nav className="flex justify-center items-center py-2">
         <div className="flex space-x-12">

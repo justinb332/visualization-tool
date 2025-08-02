@@ -1,3 +1,13 @@
 - shows a very simple picture, and user has to recreate it by drawing. 
 AI rates it. 
+- facial recognition? trying to identify/visualize faces 
 
+Difficulty curve. Either decided before each exercise, or
+in the settings, which apply to every exercise where difficulty
+is impacted. 
+Or, can make a system where it automatically adjusts
+difficulty and keeps track of user's performance,
+but that's a lot of work and might actually
+be worse. If anything, keep track of performance, but 
+only for the user to keep track, not change 
+difficulty automatically.
