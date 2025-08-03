@@ -1,32 +1,30 @@
 # Visualization Rehabilitation Tool
 
-An interactive web-based application designed to help individuals with Aphantasia (lack of mental imagery) develop and strengthen their visualization abilities through structured cognitive exercises.
+An interactive web application designed to help individuals with Aphantasia develop their mental imagery through structured cognitive exercises.
+
+## Current Exercises
+
+### 🎯 Basic Object Visualization
+Practice detailed object visualization by studying images, then hiding them to recreate every detail mentally. Features three difficulty levels (Easy/Medium/Hard) with anti-repetition algorithms ensuring varied practice sessions.
+
+### 🎨 Color Recall
+High-precision color memory exercises utilizing the complete 24-bit RGB color space (16.7 million possible combinations). Test your ability to recall and match exact colors with laboratory-grade accuracy.
+
+### ✏️ Blind Sketch
+Canvas-based drawing exercises where you visualize your sketch mentally while drawing. Develop spatial imagery and hand-eye coordination through guided drawing prompts.
 
 ## Features
 
-### 🎯 **Basic Object Visualization Exercise**
-- **Dynamic Difficulty System**: 3-tier progressive difficulty (Easy/Medium/Hard) with real-time content switching
-- **Smart Image Management**: Anti-repetition algorithm ensures users see all images before any repeats
-- **Interactive Controls**: Space bar and touch/click to toggle image visibility for visualization practice
-- **Responsive Design**: Optimized for both desktop and mobile devices
-
-### 🖼️ **Advanced Image System**
-- Difficulty-based image categorization with subfolder organization
-- Lightweight API with filename-only responses for optimal performance
-- Dynamic image loading with Next.js Image optimization
-- Support for multiple image formats (PNG, JPG, JPEG, GIF, BMP, WebP, SVG)
-
-### 🎮 **User Experience**
-- Hover-activated header with fade animations
-- Touch-friendly mobile interface with visual indicators
-- Seamless exercise flow with minimal cognitive load
-- Real-time difficulty switching without session restart
+- **Dark/Light Mode**: Toggle between themes for comfortable viewing
+- **Dynamic Difficulty System**: Three-tier progressive difficulty with real-time content switching
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Touch-Friendly Controls**: Intuitive gestures and keyboard shortcuts
+- **Smart Image Management**: Intelligent rotation prevents repetitive content
 
 ## Tech Stack
 
-- **Frontend**: React 18, Next.js 14, TypeScript
-- **Styling**: Tailwind CSS with custom component system
-- **State Management**: React Hooks (useState, useEffect)
-- **Image Handling**: Next.js Image component with optimization
-- **API**: Next.js API routes with file system integration
+Built with React, Next.js, and TypeScript for a modern, performant experience.
 
+---
+
+*Designed for cognitive rehabilitation and mental imagery development.*
