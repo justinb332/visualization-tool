@@ -4,13 +4,13 @@ An interactive web application designed to help individuals with Aphantasia deve
 
 ## Current Exercises
 
-### 🎯 Basic Object Visualization
+### Basic Object Visualization
 Practice detailed object visualization by studying images, then hiding them to recreate every detail mentally. Features three difficulty levels (Easy/Medium/Hard) with anti-repetition algorithms ensuring varied practice sessions.
 
-### 🎨 Color Recall
+### Color Recall
 High-precision color memory exercises utilizing the complete 24-bit RGB color space (16.7 million possible combinations). Test your ability to recall and match exact colors with laboratory-grade accuracy.
 
-### ✏️ Blind Sketch
+### Blind Sketch
 Canvas-based drawing exercises where you visualize your sketch mentally while drawing. Develop spatial imagery and hand-eye coordination through guided drawing prompts.
 
 ## Features
