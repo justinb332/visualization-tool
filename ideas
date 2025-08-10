@@ -1,6 +1,8 @@
 - shows a very simple picture, and user has to recreate it by drawing. 
 AI rates it. 
 - facial recognition? trying to identify/visualize faces 
+- something like that delta invisible maze game, where you have to remember the path if you 
+hit a wall, since you go back to the start
 
 Difficulty curve. Either decided before each exercise, or
 in the settings, which apply to every exercise where difficulty

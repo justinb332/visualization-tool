@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 
 const COLORS = [

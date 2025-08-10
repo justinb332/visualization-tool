@@ -3,13 +3,46 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 
-// Generate random RGB color
-const generateRandomColor = () => {
+// Generate random RGB color based on difficulty
+const generateRandomColor = (difficulty: string) => {
+  const getRandomValue = () => {
+    const base = Math.floor(Math.random() * 256)
+    
+    switch (difficulty) {
+      case 'easy':
+        return Math.floor(base / 15) * 15  // Multiples of 15 (0, 15, 30, 45, ..., 255)
+      case 'medium':
+        return Math.floor(base / 5) * 5    // Multiples of 5 (0, 5, 10, 15, ..., 255)
+      case 'hard':
+        return Math.floor(base / 3) * 3    // Multiples of 3 (0, 3, 6, 9, ..., 255)
+      case 'expert':
+      default:
+        return base                        // Any value 0-255
+    }
+  }
+  
   return [
-    Math.floor(Math.random() * 256), // Red (0-255)
-    Math.floor(Math.random() * 256), // Green (0-255)
-    Math.floor(Math.random() * 256), // Blue (0-255)
+    getRandomValue(), // Red
+    getRandomValue(), // Green
+    getRandomValue(), // Blue
   ]
+}
+
+// Get slider step based on difficulty
+const getSliderStep = (difficulty: string) => {
+  switch (difficulty) {
+    case 'easy': return 15
+    case 'medium': return 5
+    case 'hard': return 3
+    case 'expert':
+    default: return 1
+  }
+}
+
+// Snap user input to valid values for difficulty
+const snapToValidValue = (value: number, difficulty: string) => {
+  const step = getSliderStep(difficulty)
+  return Math.round(value / step) * step
 }
 
 export default function ColorGradientPage() {
@@ -23,14 +56,27 @@ export default function ColorGradientPage() {
   const [showInstructions, setShowInstructions] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [hasStarted, setHasStarted] = useState(false)
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('easy') // Track selected difficulty, default to easy
+
+  // Cycle through difficulties
+  const cycleDifficulty = () => {
+    const difficulties = ['easy', 'medium', 'hard', 'expert']
+    const currentIndex = difficulties.indexOf(selectedDifficulty)
+    const nextIndex = (currentIndex + 1) % difficulties.length
+    setSelectedDifficulty(difficulties[nextIndex])
+  }
 
   // Start a new round
   const startRound = () => {
-    const randomColor = generateRandomColor()
+    const randomColor = generateRandomColor(selectedDifficulty)
     setCurrentColor(randomColor)
-    setUserRed(128)
-    setUserGreen(128)
-    setUserBlue(128)
+    
+    // Set initial user values to valid multiples for the difficulty
+    const initialValue = snapToValidValue(128, selectedDifficulty)
+    setUserRed(initialValue)
+    setUserGreen(initialValue)
+    setUserBlue(initialValue)
+    
     setShowTarget(true)
     setPhase('memorizing')
     setScore(null)
@@ -61,7 +107,6 @@ export default function ColorGradientPage() {
     const diffB = Math.abs(targetB - userBlue)
     
     // Calculate maximum possible error for each component
-    // For a target value, max error is the distance to the furthest extreme (0 or 255)
     const maxErrorR = Math.max(targetR, 255 - targetR)
     const maxErrorG = Math.max(targetG, 255 - targetG)
     const maxErrorB = Math.max(targetB, 255 - targetB)
@@ -123,19 +168,36 @@ export default function ColorGradientPage() {
 
           {/* Starting Phase */}
           {!hasStarted ? (
-            <div className="flex gap-4 justify-center">
-              <Button 
-                onClick={startRound}
-                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
-              >
-                Start Exercise
-              </Button>
-              <Button 
-                onClick={() => setShowInstructions(true)}
-                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
-              >
-                Instructions
-              </Button>
+            <div className="space-y-4">
+              {/* Difficulty Selection */}
+              <div className="text-center">
+                <Button
+                  onClick={cycleDifficulty}
+                  variant='outline'
+                  className="btn-secondary px-4 cursor-pointer py-4 text-md font-medium" 
+                  size="default"
+                >
+                  Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}
+                </Button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center max-w-xs mx-auto">
+                <Button 
+                  onClick={startRound}
+                  className="btn-primary flex-1 cursor-pointer py-5 text-md font-medium" 
+                  size="default"
+                >
+                  Start Exercise
+                </Button>
+                <Button 
+                  onClick={() => setShowInstructions(true)}
+                  className="btn-primary flex-1 cursor-pointer py-5 text-md font-medium" 
+                  size="default"
+                >
+                  Instructions
+                </Button>
+              </div>
             </div>
           ) : (
             <>
@@ -198,6 +260,7 @@ export default function ColorGradientPage() {
                       type="range"
                       min="0"
                       max="255"
+                      step={getSliderStep(selectedDifficulty)}
                       value={userRed}
                       onChange={(e) => setUserRed(Number(e.target.value))}
                       className="w-full h-2 bg-red-200 rounded-lg appearance-none cursor-pointer slider-red"
@@ -213,6 +276,7 @@ export default function ColorGradientPage() {
                       type="range"
                       min="0"
                       max="255"
+                      step={getSliderStep(selectedDifficulty)}
                       value={userGreen}
                       onChange={(e) => setUserGreen(Number(e.target.value))}
                       className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider-green"
@@ -228,6 +292,7 @@ export default function ColorGradientPage() {
                       type="range"
                       min="0"
                       max="255"
+                      step={getSliderStep(selectedDifficulty)}
                       value={userBlue}
                       onChange={(e) => setUserBlue(Number(e.target.value))}
                       className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-blue"
@@ -247,9 +312,8 @@ export default function ColorGradientPage() {
                     {getScoreMessage(score)}
                   </p>
                   {currentColor && (
-                    <div className="text-sm text-muted-foreground mt-4">
-                      <p>Target: RGB({currentColor[0]}, {currentColor[1]}, {currentColor[2]})</p>
-                      <p>Your guess: RGB({userRed}, {userGreen}, {userBlue})</p>
+                    <div className="text-sm text-muted-foreground -mt-1">
+                      <p className="text-s mt-2">Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}</p>
                     </div>
                   )}
                 </div>
@@ -293,7 +357,7 @@ export default function ColorGradientPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold">Color Gradient Instructions</h3>
+              <h3 className="text-xl font-bold">Color Recall Instructions</h3>
               <button
                 onClick={() => setShowInstructions(false)}
                 className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -310,12 +374,22 @@ export default function ColorGradientPage() {
               <div className="space-y-2">
                 <h4 className="font-semibold">How to practice:</h4>
                 <ul className="text-muted-foreground space-y-1 ml-4">
+                  <li>• Choose your difficulty level before starting</li>
                   <li>• A color will be shown for 5 seconds</li>
                   <li>• Study the color carefully and try to memorize it</li>
                   <li>• After it disappears, use the RGB sliders to recreate it</li>
                   <li>• Try to visualize the exact shade in your mind</li>
                   <li>• Submit your recreation to see how close you got</li>
                   <li>• Higher scores mean better color memory!</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-semibold">Difficulty Levels:</h4>
+                <ul className="text-muted-foreground space-y-1 ml-4 text-xs">
+                  <li>• <strong>Easy:</strong> 15-step increments (18 options per channel)</li>
+                  <li>• <strong>Medium:</strong> 5-step increments (52 options per channel)</li>
+                  <li>• <strong>Hard:</strong> 3-step increments (86 options per channel)</li>
+                  <li>• <strong>Expert:</strong> 1-step increments (256 options per channel)</li>
                 </ul>
               </div>
               <div className="bg-accent p-3 rounded">

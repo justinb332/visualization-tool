@@ -12,13 +12,22 @@ export default function BasicObjectVisualizationPage() {
   const [isImageRevealed, setIsImageRevealed] = useState(true)
   const [showInstructions, setShowInstructions] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('easy') // Track selected difficulty, default to easy
   const [error, setError] = useState<string | null>(null)
 
+  // Cycle through difficulties
+  const cycleDifficulty = () => {
+    const difficulties = ['easy', 'medium', 'hard', 'expert']
+    const currentIndex = difficulties.indexOf(selectedDifficulty)
+    const nextIndex = (currentIndex + 1) % difficulties.length
+    setSelectedDifficulty(difficulties[nextIndex])
+  }
+
   // Load available image filenames
-  const loadImageList = async () => {
+  const loadImageList = async (difficulty: string = 'easy') => {
     try {
       setError(null)
-      const response = await fetch('/api/images?exercise=basic-object')
+      const response = await fetch(`/api/images?exercise=basic-object/${difficulty}`)
       if (!response.ok) {
         throw new Error('Failed to load image list')
       }
@@ -82,7 +91,7 @@ export default function BasicObjectVisualizationPage() {
     // Load the image list if not already loaded
     let imagesToUse = availableImages
     if (availableImages.length === 0) {
-      const imageList = await loadImageList()
+      const imageList = await loadImageList(selectedDifficulty || 'easy')
       if (imageList && imageList.length > 0) {
         imagesToUse = imageList
       }
@@ -105,7 +114,7 @@ export default function BasicObjectVisualizationPage() {
   }
 
   // Build src path from current filename
-  const currentImageSrc = currentImageFilename ? `/images/basic-object/${currentImageFilename}` : null
+  const currentImageSrc = currentImageFilename ? `/images/basic-object/${selectedDifficulty || 'easy'}/${currentImageFilename}` : null
 
   // Hide image on spacebar press or screen touch
   useEffect(() => {
@@ -162,22 +171,42 @@ export default function BasicObjectVisualizationPage() {
           )}
 
           {/* Starting Phase */}
-          {!hasStarted ? (            
-          <div className="flex gap-4 justify-center">
-              <Button
-                onClick={startExercise}
-                disabled={error !== null}
-                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
-              >
-                Start Exercise
-              </Button>
-              <Button 
-                onClick={() => setShowInstructions(true)}
-                className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" size="default"
-              >
-                Instructions
-              </Button>
+          {!hasStarted ? (
+            <div className="space-y-5">
+
+               {/* Difficulty Selection */}
+              <div className="text-center">
+                <Button
+                  onClick={cycleDifficulty}
+                  variant='outline'
+                  className="btn-secondary px-4 cursor-pointer py-4 text-md font-medium" 
+                  size="default"
+                >
+                  Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}
+                </Button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-4 justify-center">
+                <Button
+                  onClick={startExercise}
+                  disabled={error !== null}
+                  className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" 
+                  size="default"
+                >
+                  Start Exercise
+                </Button>
+                <Button 
+                  onClick={() => setShowInstructions(true)}
+                  className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" 
+                  size="default"
+                >
+                  Instructions
+                </Button>
+              </div>
+
             </div>
+            
           ) : (
             <>
               {/* Image Display Area */}

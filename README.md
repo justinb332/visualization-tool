@@ -1,34 +1,30 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Visualization Rehabilitation Tool
 
-## Getting Started
+An interactive web application designed to help individuals with Aphantasia develop their mental imagery through structured cognitive exercises.
 
-First, run the development server:
+## Current Exercises
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+### 🎯 Basic Object Visualization
+Practice detailed object visualization by studying images, then hiding them to recreate every detail mentally. Features three difficulty levels (Easy/Medium/Hard) with anti-repetition algorithms ensuring varied practice sessions.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🎨 Color Recall
+High-precision color memory exercises utilizing the complete 24-bit RGB color space (16.7 million possible combinations). Test your ability to recall and match exact colors with laboratory-grade accuracy.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ✏️ Blind Sketch
+Canvas-based drawing exercises where you visualize your sketch mentally while drawing. Develop spatial imagery and hand-eye coordination through guided drawing prompts.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Features
 
-## Learn More
+- **Dark/Light Mode**: Toggle between themes for comfortable viewing
+- **Dynamic Difficulty System**: Three-tier progressive difficulty with real-time content switching
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Touch-Friendly Controls**: Intuitive gestures and keyboard shortcuts
+- **Smart Image Management**: Intelligent rotation prevents repetitive content
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Built with React, Next.js, and TypeScript for a modern, performant experience.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+*Designed for cognitive rehabilitation and mental imagery development.*
