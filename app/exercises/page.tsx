@@ -18,7 +18,7 @@ export default function ExercisesPage() {
               <h3 className="text-xl font-semibold mb-2">Basic Object Visualization</h3>
               <p className="text-muted-foreground text-sm mb-4 flex-grow">Focus on visualizing simple objects in detail.</p>
               <div className="flex justify-center">
-                <Button className="btn-primary w-5/6 text-md" asChild>
+                <Button className="btn-primary w-2/3 text-md" asChild>
                   <Link href="/exercises/basic-object">
                     <span>Start</span>
                   </Link>
@@ -29,7 +29,7 @@ export default function ExercisesPage() {
               <h3 className="text-xl font-semibold mb-2">Blind Sketch</h3>
               <p className="text-muted-foreground text-sm mb-4 flex-grow">Use the canvas to draw, but visualize your sketch mentally.</p>
               <div className="flex justify-center">
-                <Button className="btn-primary text-md w-5/6" asChild>
+                <Button className="btn-primary text-md w-2/3" asChild>
                   <Link href="/exercises/sketch">
                     <span>Start</span>
                   </Link>
@@ -42,8 +42,21 @@ export default function ExercisesPage() {
                 Memorize colors and recreate them from memory using RGB sliders.
               </p>
               <div className="flex justify-center">
-                <Button className="btn-primary w-5/6 text-md" asChild>
+                <Button className="btn-primary w-2/3 text-md" asChild>
                   <Link href="/exercises/color-gradient">
+                    <span>Start</span>
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <div className="bg-card p-6 rounded-lg shadow-lg border border-border text-card-foreground flex flex-col h-full">
+              <h3 className="text-xl font-semibold mb-2">Invisible Maze</h3>
+              <p className="text-muted-foreground text-sm mb-4 flex-grow">
+                Navigate through an invisible maze using only your spatial memory.
+              </p>
+              <div className="flex justify-center">
+                <Button className="btn-primary w-2/3 text-md" asChild>
+                  <Link href="/exercises/invisible-maze">
                     <span>Start</span>
                   </Link>
                 </Button>

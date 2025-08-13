@@ -1,6 +1,10 @@
 - shows a very simple picture, and user has to recreate it by drawing. 
 AI rates it. 
-- facial recognition? trying to identify/visualize faces 
+- facial recognition? trying to identify/visualize faces. like basic object visualization but with faces
+- voice reads aloud a very detailed description of an object (apps4life has this)
+- link spotify account, and will go to a random song from an album you're familiar with, and you try to visualize the album cover
+- basic object visualization BUT with more specific memory involved. Ex. Select from Pokemon, Cartoon Characters, etc. and try to visualize the object in your headfrom memory BEFORE seeing it on screen.
+- Play a very short clip of someone talking that loops. Press a button to toggle white noise, to try and form auditory imagery while reading their lips. (apps4life has this, i thought it was very useful)
 - something like that delta invisible maze game, where you have to remember the path if you 
 hit a wall, since you go back to the start
 
@@ -13,3 +17,4 @@ but that's a lot of work and might actually
 be worse. If anything, keep track of performance, but 
 only for the user to keep track, not change 
 difficulty automatically.
+
