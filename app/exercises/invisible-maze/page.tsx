@@ -13,11 +13,17 @@ const DIRECTIONS = {
 }
 
 // Generate maze using recursive pathfinding with lookahead
-const generateMaze = (cellWidth: number, cellHeight: number) => {
+const generateMaze = (trueWidth: number, trueHeight: number) => {
+  // Calculate cell dimensions to support both even and odd true dimensions
+  // For odd dimensions: cellWidth = (trueWidth - 1) / 2
+  // For even dimensions: cellWidth = trueWidth / 2
+  const cellWidth = trueWidth % 2 === 1 ? Math.floor((trueWidth - 1) / 2) : Math.floor(trueWidth / 2)
+  const cellHeight = trueHeight % 2 === 1 ? Math.floor((trueHeight - 1) / 2) : Math.floor(trueHeight / 2)
+  
   // Create expanded grid: (2*cellWidth+1) x (2*cellHeight+1)
-  // Odd coordinates = cells, Even coordinates = walls
-  const mazeWidth = 2 * cellWidth + 1
-  const mazeHeight = 2 * cellHeight + 1
+  // This ensures we always get the target dimensions or close to it
+  const mazeWidth = Math.min(2 * cellWidth + 1, trueWidth)
+  const mazeHeight = Math.min(2 * cellHeight + 1, trueHeight)
   
   // Initialize with all walls (true = wall, false = path)
   const maze: boolean[][] = Array(mazeHeight).fill(null).map(() => Array(mazeWidth).fill(true))
@@ -25,21 +31,30 @@ const generateMaze = (cellWidth: number, cellHeight: number) => {
   // Helper to convert cell coordinates to maze coordinates
   const cellToMaze = (cellX: number, cellY: number) => ({ x: cellX * 2 + 1, y: cellY * 2 + 1 })
   
-  // Choose random start position on left edge (cell coordinates)
-  const startCellY = Math.floor(Math.random() * cellHeight)
-  const endCellY = Math.floor(Math.random() * cellHeight)
+  let startCellX = 0, startCellY = 0, endCellX = 0, endCellY = 0
+  // Choose random start/end position across the entire maze
+  while (startCellX === endCellX && startCellY === endCellY) {
+    startCellX = Math.floor(Math.random() * cellWidth)
+    startCellY = Math.floor(Math.random() * cellHeight)
+    endCellX = Math.floor(Math.random() * cellWidth)
+    endCellY = Math.floor(Math.random() * cellHeight)
+  }
   
   // Convert to maze coordinates
-  const start = cellToMaze(0, startCellY)
-  const end = cellToMaze(cellWidth - 1, endCellY)
+  const start = cellToMaze(startCellX, startCellY)
+  const end = cellToMaze(endCellX, endCellY)
   
-  // Recursive function to check if a path exists from current position to rightmost edge
+  // Recursive function to check if a path exists from current position to exact end position
   const canReachEnd = (cellX: number, cellY: number, visited: Set<string>, depth: number = 0): boolean => {
     // Limit recursion depth to prevent stack overflow
-    if (depth > cellWidth * cellHeight) return false
+    if (depth > cellWidth * cellHeight) {
+      return false
+    }
     
-    // If we've reached the rightmost edge, success!
-    if (cellX === cellWidth - 1) return true
+    // If we've reached the exact end cell, success!
+    if (cellX === endCellX && cellY === endCellY) {
+      return true
+    }
     
     // Get all possible directions
     const directions = [
@@ -67,21 +82,6 @@ const generateMaze = (cellWidth: number, cellHeight: number) => {
       return true
     })
     
-    // Apply dead-end prevention rules
-    if (cellY === 0) {
-      validDirections = validDirections.filter(dir => dir.name !== 'LEFT')
-    }
-    if (cellY === cellHeight - 1) {
-      validDirections = validDirections.filter(dir => dir.name !== 'LEFT')
-    }
-    if (cellX === 0) {
-      if (cellY < startCellY) {
-        validDirections = validDirections.filter(dir => dir.name !== 'DOWN')
-      } else if (cellY > startCellY) {
-        validDirections = validDirections.filter(dir => dir.name !== 'UP')
-      }
-    }
-    
     // Try each direction recursively
     for (const dir of validDirections) {
       const newCellX = cellX + dir.dx
@@ -99,15 +99,21 @@ const generateMaze = (cellWidth: number, cellHeight: number) => {
   
   // Generate path using recursive validation
   const visitedCells = new Set<string>()
-  visitedCells.add(`${0},${startCellY}`)
+  visitedCells.add(`${startCellX},${startCellY}`)
   
   // Mark start cell as path
   maze[start.y][start.x] = false
   
-  let currentCellX = 0
+  let currentCellX = startCellX
   let currentCellY = startCellY
   
-  while (currentCellX < cellWidth - 1) {
+  // Generate path until reaching the exact end position
+  let attempts = 0
+  const maxAttempts = 100
+  
+  while ((currentCellX !== endCellX || currentCellY !== endCellY) && attempts < maxAttempts) {
+    attempts++
+    
     // Get all possible directions
     const allDirections = [
       { dx: 0, dy: -1, name: 'UP' },
@@ -134,41 +140,42 @@ const generateMaze = (cellWidth: number, cellHeight: number) => {
       return true
     })
     
-    // Apply dead-end prevention rules
-    if (currentCellY === 0) {
-      validDirections = validDirections.filter(dir => dir.name !== 'LEFT')
-    }
-    if (currentCellY === cellHeight - 1) {
-      validDirections = validDirections.filter(dir => dir.name !== 'LEFT')
-    }
-    if (currentCellX === 0) {
-      if (currentCellY < startCellY) {
-        validDirections = validDirections.filter(dir => dir.name !== 'DOWN')
-      } else if (currentCellY > startCellY) {
-        validDirections = validDirections.filter(dir => dir.name !== 'UP')
+    // If we're close to the end, try to reach it directly
+    let chosenDirection
+    if (Math.abs(currentCellX - endCellX) <= 1 && Math.abs(currentCellY - endCellY) <= 1) {
+      const directPath = allDirections.find(dir => {
+        const newCellX = currentCellX + dir.dx
+        const newCellY = currentCellY + dir.dy
+        return newCellX === endCellX && newCellY === endCellY
+      })
+      if (directPath && !visitedCells.has(`${endCellX},${endCellY}`)) {
+        chosenDirection = directPath
       }
     }
     
-    // Filter directions that lead to dead ends using lookahead
-    const viableDirections = validDirections.filter(dir => {
-      const newCellX = currentCellX + dir.dx
-      const newCellY = currentCellY + dir.dy
-      const testVisited = new Set(visitedCells)
-      testVisited.add(`${newCellX},${newCellY}`)
+    // If no direct path to end, use normal pathfinding
+    if (!chosenDirection) {
+      // Filter directions that lead to dead ends using lookahead
+      const viableDirections = validDirections.filter(dir => {
+        const newCellX = currentCellX + dir.dx
+        const newCellY = currentCellY + dir.dy
+        const testVisited = new Set(visitedCells)
+        testVisited.add(`${newCellX},${newCellY}`)
+        
+        const result = canReachEnd(newCellX, newCellY, testVisited, visitedCells.size)
+        return result
+      })
       
-      return canReachEnd(newCellX, newCellY, testVisited)
-    })
-    
-    // Choose direction: prefer viable directions, fallback to valid if needed
-    let chosenDirection
-    if (viableDirections.length > 0) {
-      chosenDirection = viableDirections[Math.floor(Math.random() * viableDirections.length)]
-    } else if (validDirections.length > 0) {
-      // Fallback to any valid direction if lookahead fails
-      chosenDirection = validDirections[Math.floor(Math.random() * validDirections.length)]
-    } else {
-      // No valid moves - should rarely happen with this approach
-      break
+      // Choose direction: use viable directions or any valid direction if none are viable
+      if (viableDirections.length > 0) {
+        chosenDirection = viableDirections[Math.floor(Math.random() * viableDirections.length)]
+      } else if (validDirections.length > 0) {
+        // Fallback to any valid direction
+        chosenDirection = validDirections[Math.floor(Math.random() * validDirections.length)]
+      } else {
+        // No valid moves - regenerate with different positions
+        return generateMaze(trueWidth, trueHeight)
+      }
     }
     
     // Make the move
@@ -193,21 +200,18 @@ const generateMaze = (cellWidth: number, cellHeight: number) => {
     visitedCells.add(`${currentCellX},${currentCellY}`)
   }
   
-  // Connect to end position if needed
-  if (currentCellY !== endCellY) {
-    const minCellY = Math.min(currentCellY, endCellY)
-    const maxCellY = Math.max(currentCellY, endCellY)
-    
-    for (let cellY = minCellY; cellY < maxCellY; cellY++) {
-      const current = cellToMaze(cellWidth - 1, cellY)
-      const next = cellToMaze(cellWidth - 1, cellY + 1)
-      
-      maze[current.y][current.x] = false
-      maze[next.y][next.x] = false
-      
-      const wallY = (current.y + next.y) / 2
-      maze[wallY][current.x] = false
-    }
+  // If we couldn't reach the end after max attempts, regenerate the maze
+  if (currentCellX !== endCellX || currentCellY !== endCellY) {
+    return generateMaze(trueWidth, trueHeight)
+  }
+  
+  // Check if the final path meets minimum length requirement
+  const totalCells = cellWidth * cellHeight
+  const minPathLength = Math.floor(totalCells * 0.5)
+  const actualPathLength = visitedCells.size
+  
+  if (actualPathLength < minPathLength) {
+    return generateMaze(trueWidth, trueHeight)
   }
   
   // Ensure end cell is marked as path
@@ -229,6 +233,8 @@ export default function InvisibleMazePage() {
   const [hasStarted, setHasStarted] = useState(false)
   const [showInstructions, setShowInstructions] = useState(false)
   const [debugMode, setDebugMode] = useState(false)
+  const [showPath, setShowPath] = useState(false)
+  const [hasMovedOnce, setHasMovedOnce] = useState(false)
   
   // Maze state
   const [maze, setMaze] = useState<boolean[][]>([])
@@ -236,17 +242,18 @@ export default function InvisibleMazePage() {
   const [visitedCells, setVisitedCells] = useState<Set<string>>(new Set())
   const [gameWon, setGameWon] = useState(false)
   const [moveCount, setMoveCount] = useState(0)
+  const [attempts, setAttempts] = useState(0)
   const [mazeStart, setMazeStart] = useState({ x: 1, y: 1 })
   const [mazeEnd, setMazeEnd] = useState({ x: 3, y: 3 })
   
-  // Get maze dimensions based on difficulty (cell dimensions)
+  // Get maze dimensions based on difficulty (only odd)
   const getMazeDimensions = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return { cellWidth: 6, cellHeight: 4 }
-      case 'medium': return { cellWidth: 8, cellHeight: 6 }
-      case 'hard': return { cellWidth: 12, cellHeight: 8 }
-      case 'expert': return { cellWidth: 16, cellHeight: 10 }
-      default: return { cellWidth: 6, cellHeight: 4 }
+      case 'easy': return { trueWidth: 7, trueHeight: 5 }
+      case 'medium': return { trueWidth: 9, trueHeight: 7 }
+      case 'hard': return { trueWidth: 13, trueHeight: 9 }
+      case 'expert': return { trueWidth: 17, trueHeight: 11 }
+      default: return { trueWidth: 7, trueHeight: 6 }
     }
   }
   
@@ -258,10 +265,15 @@ export default function InvisibleMazePage() {
     setSelectedDifficulty(difficulties[nextIndex])
   }
   
+  // Toggle show path mode
+  const toggleShowPath = () => {
+    setShowPath(!showPath)
+  }
+  
   // Start new maze
   const startMaze = () => {
-    const { cellWidth, cellHeight } = getMazeDimensions(selectedDifficulty)
-    const mazeData = generateMaze(cellWidth, cellHeight)
+    const { trueWidth, trueHeight } = getMazeDimensions(selectedDifficulty)
+    const mazeData = generateMaze(trueWidth, trueHeight)
     
     setMaze(mazeData.maze)
     setMazeStart({ x: mazeData.startX, y: mazeData.startY })
@@ -270,7 +282,9 @@ export default function InvisibleMazePage() {
     setVisitedCells(new Set([`${mazeData.startX},${mazeData.startY}`]))
     setGameWon(false)
     setMoveCount(0)
+    setAttempts(0)
     setHasStarted(true)
+    setHasMovedOnce(false)
   }
   
   // Reset to start position
@@ -278,6 +292,8 @@ export default function InvisibleMazePage() {
     setPlayerPos({ x: mazeStart.x, y: mazeStart.y })
     setVisitedCells(new Set([`${mazeStart.x},${mazeStart.y}`]))
     setMoveCount(0)
+    setHasMovedOnce(false)
+    setAttempts(prev => prev + 1)
   }
   
   // Handle player movement
@@ -305,6 +321,7 @@ export default function InvisibleMazePage() {
     setPlayerPos(newPos)
     setVisitedCells(prev => new Set([...Array.from(prev), `${newX},${newY}`]))
     setMoveCount(prev => prev + 1)
+    setHasMovedOnce(true)
     
     // Check if reached end
     if (newX === mazeEnd.x && newY === mazeEnd.y) {
@@ -347,23 +364,25 @@ export default function InvisibleMazePage() {
     const isStart = x === mazeStart.x && y === mazeStart.y
     const isEnd = x === mazeEnd.x && y === mazeEnd.y
     const isWall = maze[y] && maze[y][x]
+    const isPath = !isWall
+    const shouldShowPath = showPath && !hasMovedOnce && isPath
     
     if (isPlayer) return "bg-blue-500"
     // Always show finish cell
     if (isEnd) return "bg-green-500"
     if (isStart && !isPlayer) return "bg-yellow-500"
     if (isVisited && !isWall) return "bg-blue-200"
-    if (debugMode) return isWall ? "bg-gray-800" : "bg-gray-200"
-    return "bg-gray-100"
+    if (shouldShowPath) return "bg-gray-600"
+    return "bg-background"
   }
   
   const getCellSize = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return "w-6 h-6"
-      case 'medium': return "w-5 h-5"
-      case 'hard': return "w-4 h-4"
-      case 'expert': return "w-3 h-3"
-      default: return "w-6 h-6"
+      case 'easy': return "w-24 h-24"
+      case 'medium': return "w-20 h-20"
+      case 'hard': return "w-16 h-16"
+      case 'expert': return "w-12 h-12"
+      default: return "w-24 h-24"
     }
   }
 
@@ -388,20 +407,35 @@ export default function InvisibleMazePage() {
             <div className="space-y-4">
               {/* Difficulty Selection */}
               <div className="text-center">
-                <Button
-                  onClick={cycleDifficulty}
-                  variant='outline'
-                  className="btn-secondary px-4 cursor-pointer py-4 text-md font-medium" 
-                  size="default"
-                >
-                  Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}
-                </Button>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {selectedDifficulty === 'easy' && '13×9 grid - winding paths with proper walls'}
-                  {selectedDifficulty === 'medium' && '17×13 grid - more complex navigation'}
-                  {selectedDifficulty === 'hard' && '25×17 grid - challenging mazes'}
-                  {selectedDifficulty === 'expert' && '33×21 grid - maximum challenge'}
+                <div className="flex gap-4 justify-center mb-4">
+                  <Button
+                    onClick={cycleDifficulty}
+                    variant='outline'
+                    className="btn-secondary px-4 cursor-pointer py-4 text-md font-medium" 
+                    size="default"
+                  >
+                    Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}
+                  </Button>
+                  <Button
+                    onClick={toggleShowPath}
+                    variant='outline'
+                    className="btn-secondary px-4 cursor-pointer py-4 text-md font-medium" 
+                    size="default"
+                  >
+                    Starting Path: {showPath ? 'On' : 'Off'}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDifficulty === 'easy' && '7×5 grid - winding paths with proper walls'}
+                  {selectedDifficulty === 'medium' && '9×7 grid - more complex navigation'}
+                  {selectedDifficulty === 'hard' && '14×9 grid - challenging mazes'}
+                  {selectedDifficulty === 'expert' && '17×12 grid - maximum challenge'}
                 </p>
+                {showPath && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Path will be visible at start but disappear once you move
+                  </p>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -426,20 +460,16 @@ export default function InvisibleMazePage() {
             <>
               {/* Game Stats */}
               <div className="text-center space-y-2">
-                <div className="flex justify-center gap-8 text-sm">
-                  <span>Moves: {moveCount}</span>
-                  <span>Difficulty: {selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1)}</span>
-                </div>
                 {gameWon && (
                   <div className="text-green-600 font-bold text-lg">
-                    🎉 Maze Completed! Moves: {moveCount}
+                    Maze Completed! Attempts: {attempts + 1}
                   </div>
                 )}
               </div>
 
               {/* Maze Grid */}
               <div className="flex justify-center">
-                <div className="inline-block border-2 border-gray-400 p-1 bg-gray-800">
+                <div className="inline-block">
                   {maze.map((row, y) => (
                     <div key={y} className="flex">
                       {row.map((_, x) => (
@@ -451,39 +481,6 @@ export default function InvisibleMazePage() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Legend */}
-              <div className="flex justify-center">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-yellow-500 border"></div>
-                    <span>Start</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-500 border"></div>
-                    <span>You</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-200 border"></div>
-                    <span>Path</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 border"></div>
-                    <span>Finish</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="text-center text-sm text-muted-foreground space-y-2">
-                <div>Use arrow keys to move • Hit a wall and restart from beginning</div>
-                <button
-                  onClick={() => setDebugMode(!debugMode)}
-                  className="text-xs text-blue-500 hover:text-blue-700 underline"
-                >
-                  {debugMode ? 'Hide Maze Structure' : 'Show Maze Structure (Debug)'}
-                </button>
               </div>
             </>
           )}
@@ -526,7 +523,7 @@ export default function InvisibleMazePage() {
                   <li className="pl-2">Try to reach the green finish square on the right side</li>
                   <li className="pl-2">If you hit a wall, you restart at the beginning</li>
                   <li className="pl-2">Use your memory to navigate around walls</li>
-                  <li className="pl-2">Lower move counts mean better performance</li>
+                  <li className="pl-2">Lower attempt counts mean better performance</li>
                 </ul>
               </div>
               <div className="space-y-2">
