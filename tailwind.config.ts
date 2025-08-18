@@ -23,6 +23,8 @@ const config: Config = {
         ring: "var(--ring)",
         background: "var(--background)",
         foreground: "var(--foreground)",
+        trail: "var(--maze-trail)", 
+        startTrail: "var(--maze-start-trail)",
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",

@@ -232,7 +232,6 @@ export default function InvisibleMazePage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('easy')
   const [hasStarted, setHasStarted] = useState(false)
   const [showInstructions, setShowInstructions] = useState(false)
-  const [debugMode, setDebugMode] = useState(false)
   const [showPath, setShowPath] = useState(false)
   const [hasMovedOnce, setHasMovedOnce] = useState(false)
   
@@ -253,7 +252,7 @@ export default function InvisibleMazePage() {
       case 'medium': return { trueWidth: 9, trueHeight: 7 }
       case 'hard': return { trueWidth: 13, trueHeight: 9 }
       case 'expert': return { trueWidth: 17, trueHeight: 11 }
-      default: return { trueWidth: 7, trueHeight: 6 }
+      default: return { trueWidth: 7, trueHeight: 5 }
     }
   }
   
@@ -319,12 +318,43 @@ export default function InvisibleMazePage() {
     // Valid move
     const newPos = { x: newX, y: newY }
     setPlayerPos(newPos)
-    setVisitedCells(prev => new Set([...Array.from(prev), `${newX},${newY}`]))
+    
+    // If moving to a previously visited cell (going backwards), remove the last visited cell
+    if (visitedCells.has(`${newX},${newY}`)) {
+      // Going backwards - remove the most recent cell from the trail
+      const visitedArray = Array.from(visitedCells)
+      if (visitedArray.length > 1) {
+        // Remove the last cell (the one we just came from)
+        visitedArray.pop()
+        setVisitedCells(new Set(visitedArray))
+      }
+    } else {
+      // Moving to new cell - add to visited
+      setVisitedCells(prev => new Set([...Array.from(prev), `${newX},${newY}`]))
+    }
+    
     setMoveCount(prev => prev + 1)
     setHasMovedOnce(true)
     
-    // Check if reached end
-    if (newX === mazeEnd.x && newY === mazeEnd.y) {
+    // Check if reached end (directly adjacent to finish AND on a valid path)
+    const adjacentPositions = [
+      { x: mazeEnd.x - 1, y: mazeEnd.y }, // Left
+      { x: mazeEnd.x + 1, y: mazeEnd.y }, // Right
+      { x: mazeEnd.x, y: mazeEnd.y - 1 }, // Up
+      { x: mazeEnd.x, y: mazeEnd.y + 1 }  // Down
+    ]
+    
+    const isDirectlyAdjacentToEnd = adjacentPositions.some(pos => 
+      pos.x === newX && 
+      pos.y === newY && 
+      pos.x >= 0 && 
+      pos.x < maze[0]?.length && 
+      pos.y >= 0 && 
+      pos.y < maze.length &&
+      !maze[pos.y][pos.x] // Must be on a valid path (not a wall)
+    )
+    
+    if (isDirectlyAdjacentToEnd) {
       setGameWon(true)
     }
   }
@@ -367,22 +397,38 @@ export default function InvisibleMazePage() {
     const isPath = !isWall
     const shouldShowPath = showPath && !hasMovedOnce && isPath
     
-    if (isPlayer) return "bg-blue-500"
-    // Always show finish cell
-    if (isEnd) return "bg-green-500"
-    if (isStart && !isPlayer) return "bg-yellow-500"
-    if (isVisited && !isWall) return "bg-blue-200"
-    if (shouldShowPath) return "bg-gray-600"
+    // Always show finish cell (highest priority)
+    if (isEnd) return "bg-green-600"
+    
+    // Always show start cell (overrides player when at same position)
+    if (isStart) return "bg-blue-500"
+    
+    // Visited cells using theme-aware muted color
+    if (isVisited && !isWall) return "bg-trail"
+    
+    // Starting path preview using theme-aware accent color
+    if (shouldShowPath) return "bg-start-trail"
+    
     return "bg-background"
   }
   
   const getCellSize = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return "w-24 h-24"
-      case 'medium': return "w-20 h-20"
-      case 'hard': return "w-16 h-16"
-      case 'expert': return "w-12 h-12"
+      case 'medium': return "w-19 h-19"
+      case 'hard': return "w-15 h-14"
+      case 'expert': return "w-12 h-11"
       default: return "w-24 h-24"
+    }
+  }
+
+  const getOverlayPadding = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return { top: "pt-3", bottom: "pb-1" }       // Small maze = normal padding
+      case 'medium': return { top: "pt-2", bottom: "pb-0" }     // Medium maze = less padding  
+      case 'hard': return { top: "-mt-2", bottom: "-mb-4" }       // Large maze = minimal padding
+      case 'expert': return { top: "-mt-4", bottom: "-mb-6" }   // Huge maze = negative margins!
+      default: return { top: "pt-1", bottom: "pb-1" }
     }
   }
 
@@ -425,17 +471,6 @@ export default function InvisibleMazePage() {
                     Starting Path: {showPath ? 'On' : 'Off'}
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {selectedDifficulty === 'easy' && '7×5 grid - winding paths with proper walls'}
-                  {selectedDifficulty === 'medium' && '9×7 grid - more complex navigation'}
-                  {selectedDifficulty === 'hard' && '14×9 grid - challenging mazes'}
-                  {selectedDifficulty === 'expert' && '17×12 grid - maximum challenge'}
-                </p>
-                {showPath && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Path will be visible at start but disappear once you move
-                  </p>
-                )}
               </div>
 
               {/* Action Buttons */}
@@ -458,17 +493,8 @@ export default function InvisibleMazePage() {
             </div>
           ) : (
             <>
-              {/* Game Stats */}
-              <div className="text-center space-y-2">
-                {gameWon && (
-                  <div className="text-green-600 font-bold text-lg">
-                    Maze Completed! Attempts: {attempts + 1}
-                  </div>
-                )}
-              </div>
-
-              {/* Maze Grid */}
-              <div className="flex justify-center">
+              {/* Maze Grid with Completion Overlay */}
+              <div className="flex justify-center relative">
                 <div className="inline-block">
                   {maze.map((row, y) => (
                     <div key={y} className="flex">
@@ -481,17 +507,50 @@ export default function InvisibleMazePage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Completion Overlay */}
+                {(gameWon) && (
+                  <div className="absolute inset-0 flex flex-col justify-between rounded-lg z-10">
+                    {/* Completion Message at Top */}
+                    <div className={`flex justify-center ${getOverlayPadding(selectedDifficulty).top}`}>
+                      <div className="text-foreground font-bold text-3xl text-center">
+                        Maze Completed in {attempts + 1} {attempts + 1 === 1 ? 'Attempt' : 'Attempts'}!
+                      </div>
+                    </div>
+
+                    {/* Completion Buttons at Bottom */}
+                    <div className={`flex justify-center ${getOverlayPadding(selectedDifficulty).bottom}`}>
+                      <div className="flex gap-4">
+                        <Button 
+                          onClick={startMaze}
+                          className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" 
+                          size="default"
+                        >
+                          Try Another
+                        </Button>
+                        <Button 
+                          onClick={() => setShowInstructions(true)}
+                          className="btn-primary px-5 cursor-pointer py-5 text-md font-medium" 
+                          size="default"
+                        >
+                          Instructions
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
         </div>
       </main>
 
-      {/* Unified Exercise Header - only show when exercise has started */}
-      {hasStarted && (
+      {/* Unified Exercise Header - only show when exercise has started and not completed */}
+      {hasStarted && !gameWon && (
         <UnifiedExerciseHeaderWrapper
           onNewObject={startMaze}
           onShowInstructions={() => setShowInstructions(true)}
+          newObjectLabel="New Maze"
         />
       )}
 
@@ -518,26 +577,23 @@ export default function InvisibleMazePage() {
                 <h4 className="font-semibold">How to play:</h4>
                 <ul className="text-muted-foreground space-y-1 ml-4 list-disc list-outside">
                   <li className="pl-2">Use arrow keys to move through the maze</li>
-                  <li className="pl-2">You can only see where you've been (blue trail)</li>
-                  <li className="pl-2">Start from the yellow square on the left side</li>
-                  <li className="pl-2">Try to reach the green finish square on the right side</li>
-                  <li className="pl-2">If you hit a wall, you restart at the beginning</li>
-                  <li className="pl-2">Use your memory to navigate around walls</li>
-                  <li className="pl-2">Lower attempt counts mean better performance</li>
+                  <li className="pl-2">You start from the blue square</li>
+                  <li className="pl-2">Try to reach the green finish square</li>
+                  <li className="pl-2">If you go off course, you restart at the beginning</li>
                 </ul>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold">Difficulty Levels:</h4>
                 <ul className="text-muted-foreground space-y-1 ml-4 text-xs">
-                  <li>• <strong>Easy:</strong> Small maze with larger cells</li>
-                  <li>• <strong>Medium:</strong> Moderate complexity</li>
-                  <li>• <strong>Hard:</strong> Complex navigation required</li>
-                  <li>• <strong>Expert:</strong> Maximum challenge</li>
+                  <li>• <strong>Easy:</strong> 5x3 Grid</li>
+                  <li>• <strong>Medium:</strong> 7x5 Grid</li>
+                  <li>• <strong>Hard:</strong> 11x7 Grid</li>
+                  <li>• <strong>Expert:</strong> 15x9 Grid</li>
                 </ul>
               </div>
               <div className="bg-accent p-3 rounded">
                 <p className="text-xs text-muted-foreground">
-                  <strong>Unique Algorithm:</strong> This maze uses a special generation algorithm that creates winding paths without dead ends, with proper one-line-thick walls between cells.
+                  <strong>Tip:</strong> Try to build a mental map and visualize the path on screen.
                 </p>
               </div>
             </div>

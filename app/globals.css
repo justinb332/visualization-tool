@@ -33,6 +33,8 @@ body {
   --color-accent-blue: #60a5fa;
   --font-family-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
     "Noto Color Emoji";
+  --maze-trail: #b5b5b5;
+  --maze-start-trail: #3f3f3f;
 }
 
 /* Light theme overrides */
@@ -57,6 +59,8 @@ body {
   --destructive-foreground: #ffffff;
   --ring: #3b82f6;
   --color-accent-blue: #3b82f6;
+  --maze-trail: #2e2e2e;
+  --maze-start-trail: #c0c0c0;
 }
 
 * {
@@ -94,6 +98,8 @@ html {
 .bg-card { background-color: var(--card); }
 .bg-popover { background-color: var(--popover); }
 .bg-destructive { background-color: var(--destructive); }
+.bg-trail { background-color: var(--maze-trail); }
+.bg-start-trail { background-color: var(--maze-start-trail); }
 
 /* Custom text color utilities */
 .text-background { color: var(--background); }

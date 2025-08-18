@@ -8,14 +8,16 @@ import { cn } from "@/lib/utils"
 interface UnifiedExerciseHeaderProps {
   onNewObject?: () => void
   onShowInstructions?: () => void
+  newObjectLabel?: string
 }
 
 function UnifiedExerciseHeader({ 
   isVisible,
   onNewObject, 
   onShowInstructions,
+  newObjectLabel = "New Object",
   onKeepVisible
-}: UnifiedExerciseHeaderProps & { isVisible: boolean; onKeepVisible?: () => void }) {
+}: UnifiedExerciseHeaderProps & { isVisible: boolean; onKeepVisible?: () => void; newObjectLabel?: string }) {
   const handleButtonClick = (callback: (() => void) | undefined) => {
     if (onKeepVisible) onKeepVisible()
     if (callback) callback()
@@ -57,7 +59,7 @@ function UnifiedExerciseHeader({
             className="btn-primary px-6 py-3 w-30 border min-h-[44px] touch-manipulation text-md"
             variant="secondary"
           >
-            New Object
+            {newObjectLabel}
           </Button>
         )}
         
@@ -77,7 +79,8 @@ function UnifiedExerciseHeader({
 
 export function UnifiedExerciseHeaderWrapper({ 
   onNewObject, 
-  onShowInstructions
+  onShowInstructions,
+  newObjectLabel
 }: UnifiedExerciseHeaderProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
@@ -223,6 +226,7 @@ export function UnifiedExerciseHeaderWrapper({
         isVisible={isVisible}
         onNewObject={onNewObject}
         onShowInstructions={onShowInstructions}
+        newObjectLabel={newObjectLabel}
         onKeepVisible={keepHeaderVisible}
       />
     </div>
